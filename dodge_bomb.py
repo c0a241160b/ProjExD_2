@@ -27,6 +27,7 @@ def check_bound(rct) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+
 def gameover(screen: pg.Surface) -> None:
     go_img = pg.image.load("fig/pg_bg.jpg")  # 空のSurfaceを作る
     pg.draw.rect(go_img, (0, 0, 0), pg.Rect(0, 0, 1600, 900))  # 黒い四角を描く

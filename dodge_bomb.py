@@ -44,7 +44,17 @@ def gameover(screen: pg.Surface) -> None:
     screen.blit(txt_img, txt_rct)  # 文字を画面に表示
     pg.display.update()
     time.sleep(5)
-    return
+
+
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    bb_accs = [a for a in range(1,11)]
+    img_list = []
+    for r in range(1, 11):
+        bb_img2 = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img2, (0, 0, 255), (10*r, 10*r), 10*r)
+        bb_img2.set_colorkey((0, 0, 0))
+        img_list.append(bb_img2)
+    return [img_list, bb_accs]
 
 
 def main():
@@ -61,13 +71,28 @@ def main():
     bb_rct.centerx = random.randint(0, WIDTH)
     bb_rct.centery = random.randint(0, HEIGHT) 
     vx, vy = +5, +5  # 爆弾の移動速度
+
+    bb_img2 = pg.Surface((20, 20))  # 空のSurfaceを作る
+    pg.draw.circle(bb_img2, (0, 0, 255), (10, 10), 10)  # 赤い円を描く
+    bb_img2.set_colorkey((0, 0, 0))
+    bb_rct2 = bb_img2.get_rect()  # 爆弾Rectを取得
+    bb_rct2.centerx = random.randint(0, WIDTH)
+    bb_rct2.centery = random.randint(0, HEIGHT) 
+    vx, vy = +5, +5  # 爆弾の移動速度
+
     clock = pg.time.Clock()
     tmr = 0
+
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
         if kk_rct.colliderect(bb_rct):  # こうかとんRectと爆弾Rectの衝突判定
+            print("ゲームオーバー")
+            gameover(screen)
+            return
+        if kk_rct.colliderect(bb_rct2):  # こうかとんRectと爆弾Rectの衝突判定
             print("ゲームオーバー")
             gameover(screen)
             return
@@ -91,12 +116,20 @@ def main():
         #     sum_mv[0] += 5
         kk_rct.move_ip(sum_mv)
 
+        bb_imgs, bb_accs = init_bb_imgs()
+        avx = vx*bb_accs[min(tmr//500, 9)]
+        avy = vy*bb_accs[min(tmr//500, 9)]
+        bb_img2 = bb_imgs[min(tmr//500, 9)]
+        
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 移動を無かったことにする
 
         screen.blit(kk_img, kk_rct)
         bb_rct.move_ip(vx, vy)
+        bb_rct2.move_ip(avx, avy)
+
         yoko, tate = check_bound(bb_rct)
+        yoko2, tate2 = check_bound(bb_rct2)
 
         if not yoko:
             vx *= -1  # 横方向にはみ出ていたら反転
@@ -104,7 +137,15 @@ def main():
         if not tate:
             vy *= -1  # 縦方向にはみ出ていたら反転
 
+        if not yoko2:
+            avx *= -1  # 横方向にはみ出ていたら反転
+
+        if not tate2:
+            avy *= -1
+
         screen.blit(bb_img, bb_rct)
+        screen.blit(bb_img2, bb_rct2)
+
         pg.display.update()
         tmr += 1
         clock.tick(50)

@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import time
 import pygame as pg
 
 
@@ -26,6 +27,25 @@ def check_bound(rct) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+def gameover(screen: pg.Surface) -> None:
+    go_img = pg.image.load("fig/pg_bg.jpg")  # 空のSurfaceを作る
+    pg.draw.rect(go_img, (0, 0, 0), pg.Rect(0, 0, 1600, 900))  # 黒い四角を描く
+    go_img.set_alpha(255/2)  # 透明度を半分にする
+    go_rct = go_img.get_rect()  # 四角のRectを取得
+    screen.blit(go_img, go_rct)  # 四角を画面に表示
+    go_kk_img = pg.image.load("fig/8.png")  # 泣いているこうかとんの画像を取得
+    go_kk_rct_left = go_kk_img.get_rect(center=(WIDTH/2-200, HEIGHT/2))  # 左側泣いているこうかとんのRectを取得
+    go_kk_rct_right = go_kk_img.get_rect(center=(WIDTH/2+200, HEIGHT/2))  # 右側泣いているこうかとんのRectを取得
+    screen.blit(go_kk_img, go_kk_rct_left)  # 左側こうかとんを画面に表示
+    screen.blit(go_kk_img, go_kk_rct_right)  # 右側こうかとんを画面に表示
+    fonto = pg.font.Font(None, 80)  # フォントサイズを80に設定
+    txt_img = fonto.render("Game Over", True, (255, 255, 255))  # ・白字で"Game Over"と書かれたSurfaceインスタンスを生成
+    txt_rct = txt_img.get_rect(center=(WIDTH/2,HEIGHT/2))  # 文字のRectを取得
+    screen.blit(txt_img, txt_rct)  # 文字を画面に表示
+    pg.display.update()
+    time.sleep(5)
+    return
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -49,6 +69,7 @@ def main():
                 return
         if kk_rct.colliderect(bb_rct):  # こうかとんRectと爆弾Rectの衝突判定
             print("ゲームオーバー")
+            gameover(screen)
             return
         screen.blit(bg_img, [0, 0]) 
 
@@ -69,15 +90,20 @@ def main():
         # if key_lst[pg.K_RIGHT]:
         #     sum_mv[0] += 5
         kk_rct.move_ip(sum_mv)
+
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 移動を無かったことにする
+
         screen.blit(kk_img, kk_rct)
         bb_rct.move_ip(vx, vy)
         yoko, tate = check_bound(bb_rct)
+
         if not yoko:
             vx *= -1  # 横方向にはみ出ていたら反転
+
         if not tate:
             vy *= -1  # 縦方向にはみ出ていたら反転
+
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1

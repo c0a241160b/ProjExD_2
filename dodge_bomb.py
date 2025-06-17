@@ -66,8 +66,15 @@ def main():
         # if key_lst[pg.K_RIGHT]:
         #     sum_mv[0] += 5
         kk_rct.move_ip(sum_mv)
+        if check_bound(kk_rct) != (True, True):
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 移動を無かったことにする
         screen.blit(kk_img, kk_rct)
         bb_rct.move_ip(vx, vy)
+        yoko, tate = check_bound(bb_rct)
+        if not yoko:
+            vx *= -1  # 横方向にはみ出ていたら反転
+        if not tate:
+            vy *= -1  # 縦方向にはみ出ていたら反転
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
